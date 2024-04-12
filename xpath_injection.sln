@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34616.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xpath_injection", "xpath_injection\xpath_injection.csproj", "{1FCC4232-255E-4887-BD81-16DB14DAF9FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1FCC4232-255E-4887-BD81-16DB14DAF9FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FCC4232-255E-4887-BD81-16DB14DAF9FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FCC4232-255E-4887-BD81-16DB14DAF9FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FCC4232-255E-4887-BD81-16DB14DAF9FC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {79CD3FA2-3838-4CD1-B547-8AE7D79EAF54}
+	EndGlobalSection
+EndGlobal
