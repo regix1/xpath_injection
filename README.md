@@ -21,7 +21,7 @@ This project includes a demonstration of XPath injection vulnerability, allowing
 1. Clone the repository to your local machine:
 
    ```
-   git clone https://github.com/your/repository.git
+   git clone https://github.com/regix1/xpath_injection
    ```
 
 2. Open the project in your preferred C# development environment.
