@@ -1,7 +1,17 @@
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute());
+})
+.AddMvcOptions(options =>
+{
+    options.Filters.Add(new IgnoreAntiforgeryTokenAttribute());
+});
+
 builder.Services.AddSession(); // Add session support
 
 var app = builder.Build();
@@ -16,9 +26,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
+
 app.UseSession(); // Use session middleware
+
 app.UseAuthorization();
+
 app.MapRazorPages();
 
 app.Run();
