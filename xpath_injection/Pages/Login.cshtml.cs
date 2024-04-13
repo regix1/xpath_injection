@@ -13,26 +13,36 @@ namespace xpath_injection.Pages
         [BindProperty]
         public string Password { get; set; }
 
+        public string ErrorMessage { get; set; }
+
         public IActionResult OnPost()
         {
             var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
 
-            var user = doc.XPathSelectElement($"//User[Login/Username='{Username}' and Login/Password='{Password}']");
-
-            if (user != null)
+            try
             {
-                // Login successful, store the user type and username in the session
-                var userType = user.Parent.Name.LocalName == "AdminUsers" ? "Admin" : "Normal";
-                HttpContext.Session.SetString("UserType", userType);
-                HttpContext.Session.SetString("Username", Username);
+                var user = doc.XPathSelectElement($"//User[Login/Username='{Username}' and Login/Password='{Password}']");
 
-                return RedirectToPage("Table");
+                if (user != null)
+                {
+                    // Login successful, store the user type and username in the session
+                    var userType = user.Parent.Name.LocalName == "AdminUsers" ? "Admin" : "Normal";
+                    HttpContext.Session.SetString("UserType", userType);
+                    HttpContext.Session.SetString("Username", Username);
+                    return RedirectToPage("Table");
+                }
+                else
+                {
+                    // Login failed, display an error message
+                    ErrorMessage = "Invalid username or password.";
+                    return Page();
+                }
             }
-            else
+            catch (System.Xml.XPath.XPathException ex)
             {
-                // Login failed, display an error message
-                ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                // Display the backend error message
+                ErrorMessage = ex.Message;
                 return Page();
             }
         }

@@ -5,6 +5,13 @@
 
 <h2>Login</h2>
 
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @Model.ErrorMessage
+    </div>
+}
+
 <form method="post">
     <div>
         <label for="username">Username:</label>
