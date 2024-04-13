@@ -34,3 +34,4 @@ namespace xpath_injection.Pages
             }
         }
     }
+}

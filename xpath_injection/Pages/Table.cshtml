@@ -3,23 +3,40 @@
 @{
 }
 
-<h2>XML Table</h2>
+<h2>User Table</h2>
 <table>
     <thead>
         <tr>
-            <th>Column 1</th>
-            <th>Column 2</th>
-            <!-- Add more table headers as needed -->
+            <th>Username</th>
+            <th>Password</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var row in Model.TableData)
         {
             <tr>
-                <td>@row.Element("Column1").Value</td>
-                <td>@row.Element("Column2").Value</td>
-                <!-- Add more table cells as needed -->
+                <td>@row.Element("Username").Value</td>
+                <td>@row.Element("Password").Value</td>
+                <td>
+                    <form method="post" asp-page-handler="Remove" asp-route-username="@row.Element("Username").Value">
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
             </tr>
         }
     </tbody>
 </table>
+
+<h3>Add User</h3>
+<form method="post" asp-page-handler="Add">
+    <div>
+        <label for="newUsername">Username:</label>
+        <input type="text" id="newUsername" name="NewUsername" />
+    </div>
+    <div>
+        <label for="newPassword">Password:</label>
+        <input type="password" id="newPassword" name="NewPassword" />
+    </div>
+    <button type="submit">Add</button>
+</form>
