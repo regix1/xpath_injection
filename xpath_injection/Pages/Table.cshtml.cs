@@ -8,6 +8,11 @@ namespace xpath_injection.Pages
     public class TableModel : PageModel
     {
         public IEnumerable<XElement> Users { get; set; }
+
+        public IEnumerable<XElement> Login { get; set; }
+
+        public IEnumerable<XElement> Personal { get; set; }
+
         public bool IsAdmin { get; set; }
 
         [BindProperty]
@@ -16,9 +21,20 @@ namespace xpath_injection.Pages
         [BindProperty]
         public string NewPassword { get; set; }
 
+        [BindProperty]
+        public string NewRole { get; set; }
+
+        [BindProperty]
+        public string NewPhone { get; set; }
+
+        [BindProperty]
+        public string NewEmail { get; set; }
+
+        [BindProperty]
+        public string NewSSN { get; set; }
+
         public IActionResult OnGet()
         {
-            // Get the user type from the session
             var userType = HttpContext.Session.GetString("UserType");
             if (string.IsNullOrEmpty(userType))
             {
@@ -37,8 +53,14 @@ namespace xpath_injection.Pages
             var doc = XDocument.Load(xmlFilePath);
 
             var newUser = new XElement("User",
-                new XElement("Username", NewUsername),
-                new XElement("Password", NewPassword)
+                new XElement("Login",
+                    new XElement("Username", NewUsername),
+                    new XElement("Password", NewPassword),
+                new XElement("Personal",
+                    new XElement("Role"),
+                    new XElement("Phone"),
+                    new XElement("Email"),
+                    new XElement("SSN")))
             );
 
             // Get the user type from the session
@@ -63,7 +85,7 @@ namespace xpath_injection.Pages
             var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
 
-            var userToRemove = doc.XPathSelectElement($"//User[Username='{username}']");
+            var userToRemove = doc.XPathSelectElement($"//User//Login[Username='{username}']");
 
             if (userToRemove != null)
             {

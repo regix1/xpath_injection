@@ -18,8 +18,7 @@ namespace xpath_injection.Pages
             var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
 
-            var user = doc.XPathSelectElement($"//User[Username='{Username}' and Password='{Password}']");
-
+            var user = doc.XPathSelectElement($"//User/Login[Username='{Username}' and Password='{Password}']");
             if (user != null)
             {
                 // Login successful, store the user type in the session
