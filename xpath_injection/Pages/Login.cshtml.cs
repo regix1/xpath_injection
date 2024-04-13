@@ -18,13 +18,15 @@ namespace xpath_injection.Pages
             var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
 
-            var user = doc.XPathSelectElement($"//User[Username='{Username}' and Password='{Password}']");
+            var user = doc.XPathSelectElement($"//User[Login/Username='{Username}' and Login/Password='{Password}']");
 
             if (user != null)
             {
-                // Login successful, store the user type in the session
+                // Login successful, store the user type and username in the session
                 var userType = user.Parent.Name.LocalName == "AdminUsers" ? "Admin" : "Normal";
                 HttpContext.Session.SetString("UserType", userType);
+                HttpContext.Session.SetString("Username", Username);
+
                 return RedirectToPage("Table");
             }
             else

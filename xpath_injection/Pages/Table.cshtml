@@ -9,12 +9,19 @@
 {
     <p>Logged in as: Admin</p>
 
+    <form method="post" asp-page-handler="Logout" class="mb-3">
+        <button type="submit" class="btn btn-primary">Logout</button>
+    </form>
+
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>Username</th>
                 <th>Password</th>
-                <th>User Type</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>SSN</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -22,11 +29,14 @@
             @foreach (var user in Model.Users)
             {
                 <tr>
-                    <td>@user.Element("Username").Value</td>
-                    <td>@user.Element("Password").Value</td>
-                    <td>@(user.Parent.Name.LocalName == "AdminUsers" ? "Admin" : "Normal")</td>
+                    <td>@(user.Element("Login")?.Element("Username")?.Value ?? "")</td>
+                    <td>@(user.Element("Login")?.Element("Password")?.Value ?? "")</td>
+                    <td>@(user.Element("Personal")?.Element("Role")?.Value ?? "")</td>
+                    <td>@(user.Element("Personal")?.Element("Phone")?.Value ?? "")</td>
+                    <td>@(user.Element("Personal")?.Element("Email")?.Value ?? "")</td>
+                    <td>@(user.Element("Personal")?.Element("SSN")?.Value ?? "")</td>
                     <td>
-                        <form method="post" asp-page-handler="Remove" asp-route-username="@user.Element("Username").Value">
+                        <form method="post" asp-page-handler="Remove" asp-route-username="@(user.Element("Login")?.Element("Username")?.Value ?? "")">
                             <button type="submit" class="btn btn-danger">Remove</button>
                         </form>
                     </td>
@@ -51,4 +61,36 @@
 else
 {
     <p>Logged in as: Normal User</p>
+
+    <form method="post" asp-page-handler="Logout" class="mb-3">
+        <button type="submit" class="btn btn-primary">Logout</button>
+    </form>
+
+    @if (Model.CurrentUser != null)
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>SSN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@(Model.CurrentUser.Element("Login")?.Element("Username")?.Value ?? "")</td>
+                    <td>@(Model.CurrentUser.Element("Personal")?.Element("Role")?.Value ?? "")</td>
+                    <td>@(Model.CurrentUser.Element("Personal")?.Element("Phone")?.Value ?? "")</td>
+                    <td>@(Model.CurrentUser.Element("Personal")?.Element("Email")?.Value ?? "")</td>
+                    <td>@(Model.CurrentUser.Element("Personal")?.Element("SSN")?.Value ?? "")</td>
+                </tr>
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>User information not found.</p>
+    }
 }

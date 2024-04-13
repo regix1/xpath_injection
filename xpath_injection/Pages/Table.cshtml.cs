@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -9,6 +10,7 @@ namespace xpath_injection.Pages
     {
         public IEnumerable<XElement> Users { get; set; }
         public bool IsAdmin { get; set; }
+        public XElement CurrentUser { get; set; }
 
         [BindProperty]
         public string NewUsername { get; set; }
@@ -18,9 +20,11 @@ namespace xpath_injection.Pages
 
         public IActionResult OnGet()
         {
-            // Get the user type from the session
+            // Get the user type and username from the session
             var userType = HttpContext.Session.GetString("UserType");
-            if (string.IsNullOrEmpty(userType))
+            var username = HttpContext.Session.GetString("Username");
+
+            if (string.IsNullOrEmpty(userType) || string.IsNullOrEmpty(username))
             {
                 // User is not logged in, redirect to the login page
                 return RedirectToPage("Login");
@@ -28,6 +32,12 @@ namespace xpath_injection.Pages
 
             IsAdmin = userType == "Admin";
             LoadTableData();
+
+            if (!IsAdmin)
+            {
+                CurrentUser = Users.FirstOrDefault(u => u.Element("Login")?.Element("Username")?.Value == username);
+            }
+
             return Page();
         }
 
@@ -37,8 +47,16 @@ namespace xpath_injection.Pages
             var doc = XDocument.Load(xmlFilePath);
 
             var newUser = new XElement("User",
-                new XElement("Username", NewUsername),
-                new XElement("Password", NewPassword)
+                new XElement("Login",
+                    new XElement("Username", NewUsername),
+                    new XElement("Password", NewPassword)
+                ),
+                new XElement("Personal",
+                    new XElement("Role", "User"),
+                    new XElement("Phone", ""),
+                    new XElement("Email", ""),
+                    new XElement("SSN", "")
+                )
             );
 
             // Get the user type from the session
@@ -63,7 +81,7 @@ namespace xpath_injection.Pages
             var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
 
-            var userToRemove = doc.XPathSelectElement($"//User[Username='{username}']");
+            var userToRemove = doc.XPathSelectElement($"//User[Login/Username='{username}']");
 
             if (userToRemove != null)
             {
@@ -72,6 +90,15 @@ namespace xpath_injection.Pages
             }
 
             return RedirectToPage();
+        }
+
+        public IActionResult OnPostLogout()
+        {
+            // Clear the session
+            HttpContext.Session.Clear();
+
+            // Redirect to the login page
+            return RedirectToPage("Login");
         }
 
         private void LoadTableData()
