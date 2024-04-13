@@ -4,39 +4,51 @@
 }
 
 <h2>User Table</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Password</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var row in Model.TableData)
-        {
-            <tr>
-                <td>@row.Element("Username").Value</td>
-                <td>@row.Element("Password").Value</td>
-                <td>
-                    <form method="post" asp-page-handler="Remove" asp-route-username="@row.Element("Username").Value">
-                        <button type="submit">Remove</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
 
-<h3>Add User</h3>
-<form method="post" asp-page-handler="Add">
-    <div>
-        <label for="newUsername">Username:</label>
-        <input type="text" id="newUsername" name="NewUsername" />
-    </div>
-    <div>
-        <label for="newPassword">Password:</label>
-        <input type="password" id="newPassword" name="NewPassword" />
-    </div>
-    <button type="submit">Add</button>
-</form>
+@if (Model.IsAdmin)
+{
+    <p>Logged in as: Admin</p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Password</th>
+                <th>User Type</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td>@user.Element("Username").Value</td>
+                    <td>@user.Element("Password").Value</td>
+                    <td>@(user.Parent.Name.LocalName == "AdminUsers" ? "Admin" : "Normal")</td>
+                    <td>
+                        <form method="post" asp-page-handler="Remove" asp-route-username="@user.Element("Username").Value">
+                            <button type="submit" class="btn btn-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h3>Add User</h3>
+    <form method="post" asp-page-handler="Add">
+        <div class="form-group">
+            <label for="newUsername">Username:</label>
+            <input type="text" id="newUsername" name="NewUsername" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="newPassword">Password:</label>
+            <input type="password" id="newPassword" name="NewPassword" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+}
+else
+{
+    <p>Logged in as: Normal User</p>
+}

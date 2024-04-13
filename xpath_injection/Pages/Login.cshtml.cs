@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace xpath_injection.Pages
 {
@@ -14,16 +15,16 @@ namespace xpath_injection.Pages
 
         public IActionResult OnPost()
         {
-            var xmlFilePath = "Users.xml";
+            var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
 
-            var user = doc.Root.Elements("User")
-                .FirstOrDefault(u => u.Element("Username").Value == Username &&
-                                     u.Element("Password").Value == Password);
+            var user = doc.XPathSelectElement($"//User[Username='{Username}' and Password='{Password}']");
 
             if (user != null)
             {
-                // Login successful, redirect to the table page
+                // Login successful, store the user type in the session
+                var userType = user.Parent.Name.LocalName == "AdminUsers" ? "Admin" : "Normal";
+                HttpContext.Session.SetString("UserType", userType);
                 return RedirectToPage("Table");
             }
             else

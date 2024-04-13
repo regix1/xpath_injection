@@ -1,4 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Table>
-  <!-- Add more rows as needed -->
-</Table>
+<Users>
+  <AdminUsers>
+    <User>
+      <Username>admin</Username>
+      <Password>admin</Password>
+    </User>
+  </AdminUsers>
+  <NormalUsers>
+    <User>
+      <Username>user1</Username>
+      <Password>pass1</Password>
+    </User>
+    <User>
+      <Username>user2</Username>
+      <Password>pass2</Password>
+    </User>
+  </NormalUsers>
+</Users>
