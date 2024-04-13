@@ -38,4 +38,3 @@ This project includes a demonstration of XPath injection vulnerability, allowing
 ## Disclaimer
 
 This project is for educational purposes only and should not be deployed in a production environment without appropriate security measures. Be cautious when experimenting with XPath injection and ensure that your actions comply with ethical standards and legal regulations.
-``` 
