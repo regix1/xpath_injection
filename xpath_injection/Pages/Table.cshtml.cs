@@ -1,6 +1,7 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Linq;
+using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -8,9 +9,9 @@ namespace xpath_injection.Pages
 {
     public class TableModel : PageModel
     {
-        public IEnumerable<XElement> Users { get; set; }
-        public bool IsAdmin { get; set; }
-        public XElement CurrentUser { get; set; }
+        public IEnumerable<XElement> Users { get; private set; }
+        public bool IsAdmin { get; private set; }
+        public string SearchTerm { get; private set; }
 
         [BindProperty]
         public string NewUsername { get; set; }
@@ -18,25 +19,20 @@ namespace xpath_injection.Pages
         [BindProperty]
         public string NewPassword { get; set; }
 
-        public IActionResult OnGet()
+        public IActionResult OnGet(string searchTerm)
         {
-            // Get the user type and username from the session
             var userType = HttpContext.Session.GetString("UserType");
             var username = HttpContext.Session.GetString("Username");
 
             if (string.IsNullOrEmpty(userType) || string.IsNullOrEmpty(username))
             {
-                // User is not logged in, redirect to the login page
                 return RedirectToPage("Login");
             }
 
             IsAdmin = userType == "Admin";
-            LoadTableData();
+            SearchTerm = searchTerm;
 
-            if (!IsAdmin)
-            {
-                CurrentUser = Users.FirstOrDefault(u => u.Element("Login")?.Element("Username")?.Value == username);
-            }
+            LoadTableData();
 
             return Page();
         }
@@ -49,17 +45,13 @@ namespace xpath_injection.Pages
             var newUser = new XElement("User",
                 new XElement("Login",
                     new XElement("Username", NewUsername),
-                    new XElement("Password", NewPassword)
-                ),
+                    new XElement("Password", NewPassword)),
                 new XElement("Personal",
                     new XElement("Role", "User"),
                     new XElement("Phone", ""),
                     new XElement("Email", ""),
-                    new XElement("SSN", "")
-                )
-            );
+                    new XElement("SSN", "")));
 
-            // Get the user type from the session
             var userType = HttpContext.Session.GetString("UserType");
 
             if (userType == "Admin")
@@ -94,10 +86,7 @@ namespace xpath_injection.Pages
 
         public IActionResult OnPostLogout()
         {
-            // Clear the session
             HttpContext.Session.Clear();
-
-            // Redirect to the login page
             return RedirectToPage("Login");
         }
 
@@ -113,6 +102,17 @@ namespace xpath_injection.Pages
             else
             {
                 Users = doc.XPathSelectElements("/Users/NormalUsers/User");
+            }
+
+            if (!string.IsNullOrEmpty(SearchTerm))
+            {
+                // Introduce an XPath Injection vulnerability
+                var unsafeXPathQuery = $"//User[Login/Username[contains(.,'{SearchTerm}')] or " +
+                                       $"Personal/Role[contains(.,'{SearchTerm}')] or " +
+                                       $"Personal/Phone[contains(.,'{SearchTerm}')] or " +
+                                       $"Personal/Email[contains(.,'{SearchTerm}')] or " +
+                                       $"Personal/SSN[contains(.,'{SearchTerm}')]]";
+                Users = doc.XPathSelectElements(unsafeXPathQuery);
             }
         }
     }

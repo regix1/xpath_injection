@@ -8,43 +8,81 @@
 @if (Model.IsAdmin)
 {
     <p>Logged in as: Admin</p>
+}
+else
+{
+    <p>Logged in as: Normal User</p>
+}
 
-    <form method="post" asp-page-handler="Logout" class="mb-3">
-        <button type="submit" class="btn btn-primary">Logout</button>
-    </form>
+<form method="post" asp-page-handler="Logout" class="mb-3">
+    <button type="submit" class="btn btn-primary">Logout</button>
+</form>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Password</th>
-                <th>Role</th>
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" id="searchTerm" name="SearchTerm" class="form-control" value="@Model.SearchTerm" placeholder="Search...">
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.SearchTerm))
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            Search Query Results
+        </div>
+        <div class="card-body">
+            <pre>@Model.SearchTerm</pre>
+        </div>
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Role</th>
+            @if (Model.IsAdmin)
+            {
                 <th>Phone</th>
                 <th>Email</th>
                 <th>SSN</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model.Users)
+            }
+            @if (Model.IsAdmin)
             {
-                <tr>
-                    <td>@(user.Element("Login")?.Element("Username")?.Value ?? "")</td>
-                    <td>@(user.Element("Login")?.Element("Password")?.Value ?? "")</td>
-                    <td>@(user.Element("Personal")?.Element("Role")?.Value ?? "")</td>
+                <th>Action</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@(user.Element("Login")?.Element("Username")?.Value ?? "")</td>
+                <td>@(user.Element("Personal")?.Element("Role")?.Value ?? "")</td>
+                @if (Model.IsAdmin)
+                {
                     <td>@(user.Element("Personal")?.Element("Phone")?.Value ?? "")</td>
                     <td>@(user.Element("Personal")?.Element("Email")?.Value ?? "")</td>
                     <td>@(user.Element("Personal")?.Element("SSN")?.Value ?? "")</td>
+                }
+                @if (Model.IsAdmin)
+                {
                     <td>
                         <form method="post" asp-page-handler="Remove" asp-route-username="@(user.Element("Login")?.Element("Username")?.Value ?? "")">
                             <button type="submit" class="btn btn-danger">Remove</button>
                         </form>
                     </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
 
+@if (Model.IsAdmin)
+{
     <h3>Add User</h3>
     <form method="post" asp-page-handler="Add">
         <div class="form-group">
@@ -57,40 +95,4 @@
         </div>
         <button type="submit" class="btn btn-primary">Add</button>
     </form>
-}
-else
-{
-    <p>Logged in as: Normal User</p>
-
-    <form method="post" asp-page-handler="Logout" class="mb-3">
-        <button type="submit" class="btn btn-primary">Logout</button>
-    </form>
-
-    @if (Model.CurrentUser != null)
-    {
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Role</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>SSN</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>@(Model.CurrentUser.Element("Login")?.Element("Username")?.Value ?? "")</td>
-                    <td>@(Model.CurrentUser.Element("Personal")?.Element("Role")?.Value ?? "")</td>
-                    <td>@(Model.CurrentUser.Element("Personal")?.Element("Phone")?.Value ?? "")</td>
-                    <td>@(Model.CurrentUser.Element("Personal")?.Element("Email")?.Value ?? "")</td>
-                    <td>@(Model.CurrentUser.Element("Personal")?.Element("SSN")?.Value ?? "")</td>
-                </tr>
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <p>User information not found.</p>
-    }
 }
