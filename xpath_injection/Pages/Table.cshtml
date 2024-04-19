@@ -1,18 +1,9 @@
 ﻿@page
 @model xpath_injection.Pages.TableModel
-@{
-}
 
 <h2>User Table</h2>
 
-@if (Model.IsAdmin)
-{
-    <p>Logged in as: Admin</p>
-}
-else
-{
-    <p>Logged in as: Normal User</p>
-}
+<p>Logged in as: @(Model.IsAdmin ? "Admin" : "Normal User")</p>
 
 <form method="post" asp-page-handler="Logout" class="mb-3">
     <button type="submit" class="btn btn-primary">Logout</button>
@@ -20,66 +11,39 @@ else
 
 <form method="get" class="mb-3">
     <div class="input-group">
-        <input type="text" id="searchTerm" name="SearchTerm" class="form-control" value="@Model.SearchTerm" placeholder="Search...">
+        <input type="text" id="searchTerm" name="SearchTerm" class="form-control" placeholder="Search...">
         <div class="input-group-append">
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
     </div>
 </form>
 
-@if (!string.IsNullOrEmpty(Model.SearchTerm))
+@if (Model.Users != null && Model.Users.Any())
 {
-    <div class="card mb-3">
-        <div class="card-header">
-            Search Query Results
-        </div>
-        <div class="card-body">
-            <pre>@Model.SearchTerm</pre>
-        </div>
-    </div>
-}
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Role</th>
-            @if (Model.IsAdmin)
-            {
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
                 <th>Phone</th>
                 <th>Email</th>
                 <th>SSN</th>
-            }
-            @if (Model.IsAdmin)
-            {
-                <th>Action</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model.Users)
-        {
-            <tr>
-                <td>@(user.Element("Login")?.Element("Username")?.Value ?? "")</td>
-                <td>@(user.Element("Personal")?.Element("Role")?.Value ?? "")</td>
-                @if (Model.IsAdmin)
-                {
-                    <td>@(user.Element("Personal")?.Element("Phone")?.Value ?? "")</td>
-                    <td>@(user.Element("Personal")?.Element("Email")?.Value ?? "")</td>
-                    <td>@(user.Element("Personal")?.Element("SSN")?.Value ?? "")</td>
-                }
-                @if (Model.IsAdmin)
-                {
-                    <td>
-                        <form method="post" asp-page-handler="Remove" asp-route-username="@(user.Element("Login")?.Element("Username")?.Value ?? "")">
-                            <button type="submit" class="btn btn-danger">Remove</button>
-                        </form>
-                    </td>
-                }
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td>@user.Element("Login")?.Element("Username")?.Value</td>
+                    <td>@user.Element("Personal")?.Element("Role")?.Value</td>
+                    <td>@(Model.IsAdmin || Model.ViewSensitiveData ? user.Element("Personal")?.Element("Phone")?.Value : "Unavailable")</td>
+                    <td>@(Model.IsAdmin || Model.ViewSensitiveData ? user.Element("Personal")?.Element("Email")?.Value : "Unavailable")</td>
+                    <td>@(Model.IsAdmin || Model.ViewSensitiveData ? user.Element("Personal")?.Element("SSN")?.Value : "Unavailable")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @if (Model.IsAdmin)
 {

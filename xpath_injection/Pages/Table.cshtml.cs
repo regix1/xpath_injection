@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -12,6 +13,7 @@ namespace xpath_injection.Pages
         public IEnumerable<XElement> Users { get; private set; }
         public bool IsAdmin { get; private set; }
         public string SearchTerm { get; private set; }
+        public bool ViewSensitiveData { get; private set; }
 
         [BindProperty]
         public string NewUsername { get; set; }
@@ -34,14 +36,41 @@ namespace xpath_injection.Pages
 
             LoadTableData();
 
+            if (!string.IsNullOrEmpty(SearchTerm))
+            {
+                PerformSearch();
+            }
+
             return Page();
+        }
+
+        private void PerformSearch()
+        {
+            var xmlFilePath = "TableData.xml";
+            var doc = XDocument.Load(xmlFilePath);
+
+            // Vulnerable XPath Query
+            var unsafeXPathQuery = $"//User[Login/Username[contains(.,'{SearchTerm}')] or " +
+                                   $"Personal/Role[contains(.,'{SearchTerm}')] or " +
+                                   $"Personal/Phone[contains(.,'{SearchTerm}')] or " +
+                                   $"Personal/Email[contains(.,'{SearchTerm}')] or " +
+                                   $"Personal/SSN[contains(.,'{SearchTerm}')]]";
+            Users = doc.XPathSelectElements(unsafeXPathQuery);
+            // Check if any admin data was included
+            ViewSensitiveData = Users.Any(user => user.Element("Personal")?.Element("Role")?.Value == "Admin");
+        }
+
+        private void LoadTableData()
+        {
+            var xmlFilePath = "TableData.xml";
+            var doc = XDocument.Load(xmlFilePath);
+            Users = doc.XPathSelectElements("//User");
         }
 
         public IActionResult OnPostAdd()
         {
             var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
-
             var newUser = new XElement("User",
                 new XElement("Login",
                     new XElement("Username", NewUsername),
@@ -53,7 +82,6 @@ namespace xpath_injection.Pages
                     new XElement("SSN", "")));
 
             var userType = HttpContext.Session.GetString("UserType");
-
             if (userType == "Admin")
             {
                 doc.XPathSelectElement("/Users/AdminUsers").Add(newUser);
@@ -62,7 +90,6 @@ namespace xpath_injection.Pages
             {
                 doc.XPathSelectElement("/Users/NormalUsers").Add(newUser);
             }
-
             doc.Save(xmlFilePath);
 
             return RedirectToPage();
@@ -72,7 +99,6 @@ namespace xpath_injection.Pages
         {
             var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
-
             var userToRemove = doc.XPathSelectElement($"//User[Login/Username='{username}']");
 
             if (userToRemove != null)
@@ -88,32 +114,6 @@ namespace xpath_injection.Pages
         {
             HttpContext.Session.Clear();
             return RedirectToPage("Login");
-        }
-
-        private void LoadTableData()
-        {
-            var xmlFilePath = "TableData.xml";
-            var doc = XDocument.Load(xmlFilePath);
-
-            if (IsAdmin)
-            {
-                Users = doc.XPathSelectElements("//User");
-            }
-            else
-            {
-                Users = doc.XPathSelectElements("/Users/NormalUsers/User");
-            }
-
-            if (!string.IsNullOrEmpty(SearchTerm))
-            {
-                // Introduce an XPath Injection vulnerability
-                var unsafeXPathQuery = $"//User[Login/Username[contains(.,'{SearchTerm}')] or " +
-                                       $"Personal/Role[contains(.,'{SearchTerm}')] or " +
-                                       $"Personal/Phone[contains(.,'{SearchTerm}')] or " +
-                                       $"Personal/Email[contains(.,'{SearchTerm}')] or " +
-                                       $"Personal/SSN[contains(.,'{SearchTerm}')]]";
-                Users = doc.XPathSelectElements(unsafeXPathQuery);
-            }
         }
     }
 }
