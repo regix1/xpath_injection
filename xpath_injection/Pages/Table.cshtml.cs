@@ -49,16 +49,14 @@ namespace xpath_injection.Pages
             var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
 
-            // Vulnerable XPath Query
-            var unsafeXPathQuery = $"//User[Login/Username[contains(.,'{SearchTerm}')] or " +
-                                   $"Personal/Role[contains(.,'{SearchTerm}')] or " +
-                                   $"Personal/Phone[contains(.,'{SearchTerm}')] or " +
-                                   $"Personal/Email[contains(.,'{SearchTerm}')] or " +
-                                   $"Personal/SSN[contains(.,'{SearchTerm}')]]";
+            // Overly simplified XPath query for testing vulnerability
+            var unsafeXPathQuery = $"//User[not(Login/Username) or not(Login/Username) or '1'='1']";
+
             Users = doc.XPathSelectElements(unsafeXPathQuery);
-            // Check if any admin data was included
-            ViewSensitiveData = Users.Any(user => user.Element("Personal")?.Element("Role")?.Value == "Admin");
+            // Assume viewing sensitive data if any user is returned
+            ViewSensitiveData = Users.Any();
         }
+
 
         private void LoadTableData()
         {
