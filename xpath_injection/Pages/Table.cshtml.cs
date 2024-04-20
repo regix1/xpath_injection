@@ -10,13 +10,10 @@ namespace xpath_injection.Pages
 {
     public class TableModel : PageModel
     {
-        public IEnumerable<XElement> Users { get; private set; }
+        public IEnumerable<UserModel> Users { get; private set; }
         public bool IsAdmin { get; private set; }
         public string SearchTerm { get; private set; }
         public string ErrorMessage { get; private set; }
-        public bool ShowPhone { get; private set; }
-        public bool ShowEmail { get; private set; }
-        public bool ShowSSN { get; private set; }
 
         [BindProperty]
         public string NewUsername { get; set; }
@@ -44,7 +41,6 @@ namespace xpath_injection.Pages
         private bool IsAdminUser(string username)
         {
             var doc = XDocument.Load(xmlFilePath);
-            // Vulnerable XPath Query: No single quote escaping
             var query = $"//User[Login/Username='{username}' and Personal/Privilege='admin']";
             return doc.XPathSelectElement(query) != null;
         }
@@ -92,26 +88,43 @@ namespace xpath_injection.Pages
         private void LoadTableData()
         {
             var doc = XDocument.Load(xmlFilePath);
-            Users = IsAdmin ? doc.XPathSelectElements("//User")
-                            : doc.XPathSelectElements("//User[not(Personal/Privilege='admin')]");
+            var userElements = IsAdmin ? doc.XPathSelectElements("//User")
+                                        : doc.XPathSelectElements("//User[not(Personal/Privilege='admin')]");
 
-            ShowPhone = IsAdmin;
-            ShowEmail = IsAdmin;
-            ShowSSN = IsAdmin;
+            Users = userElements.Select(u => new UserModel
+            {
+                Username = u.Element("Login")?.Element("Username")?.Value,
+                Role = u.Element("Personal")?.Element("Role")?.Value,
+                Phone = IsAdmin ? u.Element("Personal")?.Element("Phone")?.Value : "Unavailable",
+                Email = IsAdmin ? u.Element("Personal")?.Element("Email")?.Value : "Unavailable",
+                SSN = IsAdmin ? u.Element("Personal")?.Element("SSN")?.Value : "Unavailable"
+            });
 
             if (!string.IsNullOrEmpty(SearchTerm))
             {
-                // Intentionally vulnerable XPath Query: No single quote escaping
                 var unsafeXPathQuery = $"//User[Login/Username='{SearchTerm}' or " +
                                         $"Personal/Role='{SearchTerm}' or " +
                                         $"Personal/Phone='{SearchTerm}' or " +
                                         $"Personal/Email='{SearchTerm}' or " +
-                                        $"Personal/SSN='{SearchTerm}' or " +
-                                        $"Personal/Privilege='{SearchTerm}']";
+                                        $"Personal/SSN='{SearchTerm}']";
 
                 try
                 {
-                    Users = doc.XPathSelectElements(unsafeXPathQuery);
+                    var searchResults = doc.XPathSelectElements(unsafeXPathQuery);
+                    Users = searchResults.Select(u =>
+                    {
+                        var isAdmin = u.XPathSelectElement("Personal/Privilege") != null &&
+                                      u.XPathSelectElement("Personal/Privilege").Value == "admin";
+
+                        return new UserModel
+                        {
+                            Username = u.Element("Login")?.Element("Username")?.Value,
+                            Role = u.Element("Personal")?.Element("Role")?.Value,
+                            Phone = isAdmin ? u.Element("Personal")?.Element("Phone")?.Value : "Unavailable",
+                            Email = isAdmin ? u.Element("Personal")?.Element("Email")?.Value : "Unavailable",
+                            SSN = isAdmin ? u.Element("Personal")?.Element("SSN")?.Value : "Unavailable"
+                        };
+                    });
                 }
                 catch (System.Xml.XPath.XPathException ex)
                 {
@@ -119,5 +132,14 @@ namespace xpath_injection.Pages
                 }
             }
         }
+    }
+
+    public class UserModel
+    {
+        public string Username { get; set; }
+        public string Role { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+        public string SSN { get; set; }
     }
 }
