@@ -93,8 +93,6 @@ namespace xpath_injection.Pages
 
             if (!string.IsNullOrEmpty(SearchTerm))
             {
-
-                // Intentionally vulnerable XPath query
                 var unsafeXPathQuery = $"//User[Login/Username='{SearchTerm}' or " +
                                         $"Personal/Role='{SearchTerm}' or " +
                                         $"Personal/Phone='{SearchTerm}' or " +
@@ -154,10 +152,8 @@ namespace xpath_injection.Pages
         }
         bool CheckCondition(string xpath)
         {
-            // Execute the XPath query and count the matching nodes
             var nodeCount = CountMatchingNodes(xpath);
 
-            // Return true if more than one node matches the query
             return nodeCount > 1;
         }
 
@@ -166,11 +162,7 @@ namespace xpath_injection.Pages
             try
             {
                 var doc = XDocument.Load(xmlFilePath);
-
-                // Select matching elements using XPathSelectElements
                 var matchingElements = doc.XPathSelectElements(xpath);
-
-                // Filter elements based on isAdmin condition and count them
                 var count = matchingElements.Count(u =>
                     (u.Element("Login")?.Element("Username") != null) &&
                     (u.Element("Login")?.Element("Password") != null) &&
@@ -183,7 +175,6 @@ namespace xpath_injection.Pages
             }
             catch (Exception ex)
             {
-                // Handle exceptions appropriately
                 Console.WriteLine("Error occurred: " + ex.Message);
                 return 0;
             }
