@@ -89,43 +89,27 @@ namespace xpath_injection.Pages
         {
             var doc = XDocument.Load(xmlFilePath);
 
-            // Assume that the user is not an admin initially.
-            IsAdmin = false;
-
             if (!string.IsNullOrEmpty(SearchTerm))
             {
+                // Intentionally vulnerable XPath query
                 var unsafeXPathQuery = $"//User[Login/Username='{SearchTerm}' or " +
-                                       $"Personal/Role='{SearchTerm}' or " +
-                                       $"Personal/Phone='{SearchTerm}' or " +
-                                       $"Personal/Email='{SearchTerm}' or " +
-                                       $"Personal/SSN='{SearchTerm}']";
+                                        $"Personal/Role='{SearchTerm}' or " +
+                                        $"Personal/Phone='{SearchTerm}' or " +
+                                        $"Personal/Email='{SearchTerm}' or " +
+                                        $"Personal/SSN='{SearchTerm}' or " +
+                                        $"Personal/Privilege='{SearchTerm}']";
 
                 try
                 {
-                    // Fetch users based on the search term.
-                    var foundUsers = doc.XPathSelectElements(unsafeXPathQuery);
-
-                    // Determine if any of the found users are admins.
-                    // WARNING: This is for demonstration only. It is extremely unsafe and should never be done in production.
-                    foreach (var user in foundUsers)
-                    {
-                        var privilegeElement = user.XPathSelectElement("Personal/Privilege");
-                        if (privilegeElement != null && privilegeElement.Value == "admin")
+                    Users = doc.XPathSelectElements(unsafeXPathQuery)
+                        .Select(u => new UserModel
                         {
-                            IsAdmin = true;
-                            break; // If any admin is found in the search results, break the loop.
-                        }
-                    }
-
-                    // Now we select the user information based on the IsAdmin flag.
-                    Users = foundUsers.Select(u => new UserModel
-                    {
-                        Username = u.Element("Login")?.Element("Username")?.Value,
-                        Role = u.Element("Personal")?.Element("Role")?.Value,
-                        Phone = IsAdmin ? u.Element("Personal")?.Element("Phone")?.Value : "Unavailable",
-                        Email = IsAdmin ? u.Element("Personal")?.Element("Email")?.Value : "Unavailable",
-                        SSN = IsAdmin ? u.Element("Personal")?.Element("SSN")?.Value : "Unavailable"
-                    });
+                            Username = u.Element("Login")?.Element("Username")?.Value,
+                            Role = u.Element("Personal")?.Element("Role")?.Value,
+                            Phone = IsAdmin ? u.Element("Personal")?.Element("Phone")?.Value : "Unavailable",
+                            Email = IsAdmin ? u.Element("Personal")?.Element("Email")?.Value : "Unavailable",
+                            SSN = IsAdmin ? u.Element("Personal")?.Element("SSN")?.Value : "Unavailable"
+                        });
                 }
                 catch (System.Xml.XPath.XPathException ex)
                 {
@@ -134,12 +118,27 @@ namespace xpath_injection.Pages
             }
             else
             {
-                // If there is no search term, we do not display any users.
-                Users = Enumerable.Empty<UserModel>();
+                Users = IsAdmin ? doc.XPathSelectElements("//User")
+                                    .Select(u => new UserModel
+                                    {
+                                        Username = u.Element("Login")?.Element("Username")?.Value,
+                                        Role = u.Element("Personal")?.Element("Role")?.Value,
+                                        Phone = u.Element("Personal")?.Element("Phone")?.Value,
+                                        Email = u.Element("Personal")?.Element("Email")?.Value,
+                                        SSN = u.Element("Personal")?.Element("SSN")?.Value
+                                    })
+                                : doc.XPathSelectElements("//User[not(Personal/Privilege='admin')]")
+                                    .Select(u => new UserModel
+                                    {
+                                        Username = u.Element("Login")?.Element("Username")?.Value,
+                                        Role = u.Element("Personal")?.Element("Role")?.Value,
+                                        Phone = "Unavailable",
+                                        Email = "Unavailable",
+                                        SSN = "Unavailable"
+                                    });
             }
         }
     }
-
         public class UserModel
     {
         public string Username { get; set; }
