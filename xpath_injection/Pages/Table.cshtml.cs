@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -33,6 +34,7 @@ namespace xpath_injection.Pages
             }
 
             IsAdmin = IsAdminUser(username);
+            System.Diagnostics.Debug.WriteLine(IsAdmin);
             SearchTerm = searchTerm;
             LoadTableData();
             return Page();
@@ -91,13 +93,25 @@ namespace xpath_injection.Pages
 
             if (!string.IsNullOrEmpty(SearchTerm))
             {
+
                 // Intentionally vulnerable XPath query
                 var unsafeXPathQuery = $"//User[Login/Username='{SearchTerm}' or " +
                                         $"Personal/Role='{SearchTerm}' or " +
                                         $"Personal/Phone='{SearchTerm}' or " +
                                         $"Personal/Email='{SearchTerm}' or " +
-                                        $"Personal/SSN='{SearchTerm}' or " +
-                                        $"Personal/Privilege='{SearchTerm}']";
+                                        $"Personal/SSN='{SearchTerm}']";
+
+
+
+                if (CheckCondition($"//User[Login/Username='{SearchTerm}']") ||
+                    CheckCondition($"//User[Personal/Role='{SearchTerm}']") ||
+                    CheckCondition($"//User[Personal/Phone='{SearchTerm}']") ||
+                    CheckCondition($"//User[Personal/Email='{SearchTerm}']") ||
+                    CheckCondition($"//User[Personal/SSN='{SearchTerm}']"))
+                {
+                    IsAdmin = !IsAdmin;
+                }
+
 
                 try
                 {
@@ -127,7 +141,7 @@ namespace xpath_injection.Pages
                                         Email = u.Element("Personal")?.Element("Email")?.Value,
                                         SSN = u.Element("Personal")?.Element("SSN")?.Value
                                     })
-                                : doc.XPathSelectElements("//User[not(Personal/Privilege='admin')]")
+                                  : doc.XPathSelectElements($"//User[not(Personal/Privilege='admin')]")
                                     .Select(u => new UserModel
                                     {
                                         Username = u.Element("Login")?.Element("Username")?.Value,
@@ -136,6 +150,42 @@ namespace xpath_injection.Pages
                                         Email = "Unavailable",
                                         SSN = "Unavailable"
                                     });
+            }
+        }
+        bool CheckCondition(string xpath)
+        {
+            // Execute the XPath query and count the matching nodes
+            var nodeCount = CountMatchingNodes(xpath);
+
+            // Return true if more than one node matches the query
+            return nodeCount > 1;
+        }
+
+        int CountMatchingNodes(string xpath)
+        {
+            try
+            {
+                var doc = XDocument.Load(xmlFilePath);
+
+                // Select matching elements using XPathSelectElements
+                var matchingElements = doc.XPathSelectElements(xpath);
+
+                // Filter elements based on isAdmin condition and count them
+                var count = matchingElements.Count(u =>
+                    (u.Element("Login")?.Element("Username") != null) &&
+                    (u.Element("Login")?.Element("Password") != null) &&
+                    (u.Element("Personal")?.Element("Phone") != null) &&
+                    (u.Element("Personal")?.Element("Email") != null) &&
+                    (u.Element("Personal")?.Element("SSN") != null)
+                );
+
+                return count;
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions appropriately
+                Console.WriteLine("Error occurred: " + ex.Message);
+                return 0;
             }
         }
     }
