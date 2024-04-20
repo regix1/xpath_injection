@@ -62,33 +62,26 @@ else
 
         </tr>
     </thead>
-    <tbody>
-        @foreach (var user in Model.Users)
-
-        {
-
-            <tr>
-                <td>@(user.Element("Login")?.Element("Username")?.Value ?? "")</td>
-                <td>@(user.Element("Personal")?.Element("Role")?.Value ?? "")</td>
-                <td>@(Model.ShowPhone ? user.Element("Personal")?.Element("Phone")?.Value ?? "" : "Unavailable")</td>
-                <td>@(Model.ShowEmail ? user.Element("Personal")?.Element("Email")?.Value ?? "" : "Unavailable")</td>
-                <td>@(Model.ShowSSN ? user.Element("Personal")?.Element("SSN")?.Value ?? "" : "Unavailable")</td>
-                @if (Model.IsAdmin)
-
-                {
-
-                    <td>
-                        <form method="post" asp-page-handler="Remove" asp-route-username="@(user.Element("Login")?.Element("Username")?.Value ?? "")">
-                            <button type="submit" class="btn btn-danger">Remove</button>
-
-                        </form>
-                    </td>
-                }
-
-            </tr>
-        }
-
-    </tbody>
+<tbody>
+    @foreach (var user in Model.Users)
+    {
+        <tr>
+            <td>@(user.Element("Login")?.Element("Username")?.Value ?? "")</td>
+            <td>@(user.Element("Personal")?.Element("Role")?.Value ?? "")</td>
+            <td>@(Model.ShowPhone ? user.Element("Personal")?.Element("Phone")?.Value ?? "" : "Unavailable")</td>
+            <td>@(Model.ShowEmail ? user.Element("Personal")?.Element("Email")?.Value ?? "" : "Unavailable")</td>
+            <td>@(Model.ShowSSN ? user.Element("Personal")?.Element("SSN")?.Value ?? "" : "Unavailable")</td>
+            @if (Model.IsAdmin)
+            {
+                <td>
+                    <form method="post" asp-page-handler="Remove" asp-route-username="@(user.Element("Login")?.Element("Username")?.Value ?? "")">
+                        <button type="submit" class="btn btn-danger">Remove</button>
+                    </form>
+                </td>
+            }
+        </tr>
+    }
+</tbody>
 </table>
 @if (!string.IsNullOrEmpty(Model.ErrorMessage))
 

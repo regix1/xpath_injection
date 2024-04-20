@@ -24,25 +24,33 @@ namespace xpath_injection.Pages
         [BindProperty]
         public string NewPassword { get; set; }
 
+        private readonly string xmlFilePath = "TableData.xml";
+
         public IActionResult OnGet(string searchTerm)
         {
-            var userType = HttpContext.Session.GetString("UserType");
             var username = HttpContext.Session.GetString("Username");
 
-            if (string.IsNullOrEmpty(userType) || string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(username))
             {
                 return RedirectToPage("Login");
             }
 
-            IsAdmin = userType == "Admin";
+            IsAdmin = IsAdminUser(username);
             SearchTerm = searchTerm;
             LoadTableData();
             return Page();
         }
 
+        private bool IsAdminUser(string username)
+        {
+            var doc = XDocument.Load(xmlFilePath);
+            // Vulnerable XPath Query: No single quote escaping
+            var query = $"//User[Login/Username='{username}' and Personal/Privilege='admin']";
+            return doc.XPathSelectElement(query) != null;
+        }
+
         public IActionResult OnPostAdd()
         {
-            var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
 
             var newUser = new XElement("User",
@@ -53,25 +61,16 @@ namespace xpath_injection.Pages
                     new XElement("Role", "User"),
                     new XElement("Phone", ""),
                     new XElement("Email", ""),
-                    new XElement("SSN", "")));
+                    new XElement("SSN", ""),
+                    new XElement("Privilege", "user")));
 
-            var userType = HttpContext.Session.GetString("UserType");
-            if (userType == "Admin")
-            {
-                doc.XPathSelectElement("/Users/AdminUsers").Add(newUser);
-            }
-            else
-            {
-                doc.XPathSelectElement("/Users/NormalUsers").Add(newUser);
-            }
-
+            doc.Root.Add(newUser);
             doc.Save(xmlFilePath);
             return RedirectToPage();
         }
 
         public IActionResult OnPostRemove(string username)
         {
-            var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
 
             var userToRemove = doc.XPathSelectElement($"//User[Login/Username='{username}']");
@@ -92,44 +91,33 @@ namespace xpath_injection.Pages
 
         private void LoadTableData()
         {
-            var xmlFilePath = "TableData.xml";
             var doc = XDocument.Load(xmlFilePath);
+            Users = IsAdmin ? doc.XPathSelectElements("//User")
+                            : doc.XPathSelectElements("//User[not(Personal/Privilege='admin')]");
 
-            if (IsAdmin)
-            {
-                Users = doc.XPathSelectElements("//User");
-            }
-            else
-            {
-                Users = doc.XPathSelectElements("/Users/NormalUsers/User");
-            }
+            ShowPhone = IsAdmin;
+            ShowEmail = IsAdmin;
+            ShowSSN = IsAdmin;
 
             if (!string.IsNullOrEmpty(SearchTerm))
             {
-                // Intentionally vulnerable: Dynamically building XPath string from user input.
-                // Using single quotes around the SearchTerm to allow for ending and starting a new predicate in the query.
+                // Intentionally vulnerable XPath Query: No single quote escaping
                 var unsafeXPathQuery = $"//User[Login/Username='{SearchTerm}' or " +
                                         $"Personal/Role='{SearchTerm}' or " +
                                         $"Personal/Phone='{SearchTerm}' or " +
                                         $"Personal/Email='{SearchTerm}' or " +
-                                        $"Personal/SSN='{SearchTerm}']";
+                                        $"Personal/SSN='{SearchTerm}' or " +
+                                        $"Personal/Privilege='{SearchTerm}']";
 
                 try
                 {
                     Users = doc.XPathSelectElements(unsafeXPathQuery);
                 }
-                catch (System.Xml.XPath.XPathException)
+                catch (System.Xml.XPath.XPathException ex)
                 {
-                    // If there's an XPath error (likely from a malformed injection attempt), the system will still show the generic unavailable message.
-                    // This catch block makes it look like the system is handling errors, but it's actually part of the injection vulnerability scenario.
-                    ErrorMessage = "Unavailable"; // Assuming ErrorMessage is shown somewhere on the front end.
+                    ErrorMessage = $"Error in XPath Query: {ex.Message}";
                 }
             }
-
-            ShowPhone = IsAdmin;
-            ShowEmail = IsAdmin;
-            ShowSSN = IsAdmin;
         }
-
     }
 }

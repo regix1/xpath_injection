@@ -11,6 +11,7 @@
         <Phone>1234567890</Phone>
         <Email>admin1@example.com</Email>
         <SSN>123-45-6789</SSN>
+        <Privilege>admin</Privilege>
       </Personal>
     </User>
     <User>
@@ -23,6 +24,7 @@
         <Phone>9876543210</Phone>
         <Email>admin2@example.com</Email>
         <SSN>987-65-4321</SSN>
+        <Privilege>admin</Privilege>
       </Personal>
     </User>
     <User>
@@ -35,6 +37,7 @@
         <Phone>5551234567</Phone>
         <Email>admin3@example.com</Email>
         <SSN>555-12-3456</SSN>
+        <Privilege>admin</Privilege>
       </Personal>
     </User>
     <User>
@@ -47,6 +50,7 @@
         <Phone>3335557777</Phone>
         <Email>admin4@example.com</Email>
         <SSN>333-55-7777</SSN>
+        <Privilege>admin</Privilege>
       </Personal>
     </User>
     <User>
@@ -59,6 +63,7 @@
         <Phone>4448889999</Phone>
         <Email>admin5@example.com</Email>
         <SSN>444-88-9999</SSN>
+        <Privilege>admin</Privilege>
       </Personal>
     </User>
   </AdminUsers>
@@ -73,6 +78,7 @@
         <Phone>1112223333</Phone>
         <Email>user1@example.com</Email>
         <SSN>111-22-3333</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -85,6 +91,7 @@
         <Phone>2223334444</Phone>
         <Email>user2@example.com</Email>
         <SSN>222-33-4444</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -97,6 +104,7 @@
         <Phone>3334445555</Phone>
         <Email>user3@example.com</Email>
         <SSN>333-44-5555</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -109,6 +117,7 @@
         <Phone>4445556666</Phone>
         <Email>user4@example.com</Email>
         <SSN>444-55-6666</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -121,6 +130,7 @@
         <Phone>5556667777</Phone>
         <Email>user5@example.com</Email>
         <SSN>555-66-7777</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -133,6 +143,7 @@
         <Phone>6667778888</Phone>
         <Email>user6@example.com</Email>
         <SSN>666-77-8888</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -145,6 +156,7 @@
         <Phone>7778889999</Phone>
         <Email>user7@example.com</Email>
         <SSN>777-88-9999</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -157,6 +169,7 @@
         <Phone>8889990000</Phone>
         <Email>user8@example.com</Email>
         <SSN>888-99-0000</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -169,6 +182,7 @@
         <Phone>9990001111</Phone>
         <Email>user9@example.com</Email>
         <SSN>999-00-1111</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -181,6 +195,7 @@
         <Phone>1010101010</Phone>
         <Email>user10@example.com</Email>
         <SSN>101-01-0101</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -193,6 +208,7 @@
         <Phone>1212121212</Phone>
         <Email>user11@example.com</Email>
         <SSN>121-21-2121</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -205,6 +221,7 @@
         <Phone>1313131313</Phone>
         <Email>user12@example.com</Email>
         <SSN>131-31-3131</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -217,6 +234,7 @@
         <Phone>1414141414</Phone>
         <Email>user13@example.com</Email>
         <SSN>141-41-4141</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -229,6 +247,7 @@
         <Phone>1515151515</Phone>
         <Email>user14@example.com</Email>
         <SSN>151-51-5151</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
     <User>
@@ -241,6 +260,7 @@
         <Phone>1616161616</Phone>
         <Email>user15@example.com</Email>
         <SSN>161-61-6161</SSN>
+        <Privilege>user</Privilege>
       </Personal>
     </User>
   </NormalUsers>
