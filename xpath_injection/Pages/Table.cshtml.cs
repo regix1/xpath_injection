@@ -1,9 +1,5 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -55,7 +51,7 @@ namespace xpath_injection.Pages
                 new XElement("Login",
                     new XElement("Username", NewUsername),
                     new XElement("Password", NewPassword)),
-                new XElement("Personal",
+                    new XElement("Personal",
                     new XElement("Role", "User"),
                     new XElement("Phone", ""),
                     new XElement("Email", ""),
