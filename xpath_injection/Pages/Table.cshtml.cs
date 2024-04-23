@@ -107,7 +107,10 @@ namespace xpath_injection.Pages
                     CheckCondition($"//User[Personal/Email='{SearchTerm}']") ||
                     CheckCondition($"//User[Personal/SSN='{SearchTerm}']"))
                 {
-                    IsAdmin = !IsAdmin;
+                    if (SearchTerm.Contains("admin"))
+                    {
+                        IsAdmin = !IsAdmin;
+                    }
                 }
 
 
